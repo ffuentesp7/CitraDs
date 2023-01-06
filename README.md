@@ -1,1 +1,2 @@
-# CitraDs
+# CitraDS
+Citra Data Store

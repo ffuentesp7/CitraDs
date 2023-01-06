@@ -24,12 +24,15 @@ namespace CitraDataStore.Models
         public virtual DbSet<Menus> Menus { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
 
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                //optionsBuilder.UseMySql("Server=localhost;Database=wwbiov_citrads;User=wwbiov_admin;Password=c1tr4084!" + '"'+"#");
                 optionsBuilder.UseMySql("Server=citrads.cmmqgr4kvqxz.us-east-2.rds.amazonaws.com;Database=citra;User=admin;Password=c1tr420cds");
+                //optionsBuilder.UseMySql("Server=127.0.0.1;Database=citrads;User=root");
             }
         }
 
@@ -57,9 +60,17 @@ namespace CitraDataStore.Models
                 entity.Property(e => e.Password)
                     .HasColumnName("password")
                     .HasColumnType("varchar(255)");
+               
+                entity.Property(e => e.IdEstacionesAsignadas)
+                    .HasColumnName("id_estaciones_asignadas")
+                    .HasColumnType("varchar(999)");
 
                 entity.Property(e => e.RolesId)
                     .HasColumnName("roles_id")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.Dias_disponibles)
+                    .HasColumnName("dias_disponibles")
                     .HasColumnType("int(11)");
 
                 entity.HasOne(d => d.Roles)
@@ -131,7 +142,6 @@ namespace CitraDataStore.Models
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Estado)
-                    .IsRequired()
                     .HasColumnName("estado")
                     .HasColumnType("tinytext");
 
@@ -157,22 +167,6 @@ namespace CitraDataStore.Models
                     .HasColumnName("RTU")
                     .HasColumnType("int(11)")
                     .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.UltimaFecha)
-                    .HasColumnName("ultima_fecha")
-                    .HasColumnType("date");
-
-                entity.Property(e => e.UltimaFechaClon)
-                    .HasColumnName("ultima_fecha_clon")
-                    .HasColumnType("date");
-
-                entity.Property(e => e.UltimaHora)
-                    .HasColumnName("ultima_hora")
-                    .HasColumnType("time");
-
-                entity.Property(e => e.UltimaHoraClon)
-                    .HasColumnName("ultima_hora_clon")
-                    .HasColumnType("time");
             });
 
             modelBuilder.Entity<Instrumento>(entity =>

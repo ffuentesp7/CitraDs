@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CitraDataStore.Models;
@@ -12,6 +11,7 @@ namespace CitraDataStore.Controllers
     public class EstacionesAsignadasController : Controller
     {
         MyDbContext _context = new MyDbContext();
+        readonly SensoresContext context = new SensoresContext();
 
 
         // GET: Admins
@@ -34,7 +34,7 @@ namespace CitraDataStore.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("id,idusuario,idestacion")] EstacionesAsignadas estacion)
+        public async Task<IActionResult> Create([Bind("Id,AdconId,Nombre,Latitud, Longitud")] Estacioneve estacion)
         {
             if (ModelState.IsValid)
             {
@@ -53,30 +53,32 @@ namespace CitraDataStore.Controllers
                 return NotFound();
             }
 
-            var admins = await _context.Admins.SingleOrDefaultAsync(m => m.Id == id);
-            if (admins == null)
+            var estacioneve = await _context.Estacioneve.SingleOrDefaultAsync(m => m.Id == id);
+            if (estacioneve == null)
             {
                 return NotFound();
             }
-            ViewData["RolesId"] = new SelectList(_context.Roles, "Id", "Title", admins.RolesId);
-            return View(admins);
+            //ViewData["RolesId"] = new SelectList(_context.Roles, "Id", "Title", admins.RolesId);
+            return View(estacioneve);
         }
 
         // POST: Admins/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Email,RolesId")] Admins admins)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,AdconId,Nombre,Latitud, Longitud")] Estacioneve estaciones)
         {
-            if (id != admins.Id)
+            if (id != estaciones.Id)
             {
                 return NotFound();
             }
 
-            Admins admin = await _context.Admins.Where(s => s.Id == admins.Id).FirstOrDefaultAsync();
-            admin.FullName = admins.FullName;
-            admin.Email = admins.Email;
-            admin.RolesId = admins.RolesId;
+            Estacioneve estacion = await _context.Estacioneve.Where(s => s.Id == estaciones.Id).FirstOrDefaultAsync();
+            estacion.Id = estaciones.Id;
+            estacion.AdconId = estaciones.AdconId;
+            estacion.Nombre = estaciones.Nombre;
+            estacion.Latitud = estaciones.Latitud;
+            estacion.Longitud = estaciones.Longitud;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -105,8 +107,8 @@ namespace CitraDataStore.Controllers
         [HttpPost, ActionName("DeleteConfirmed")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var admins = await _context.Admins.SingleOrDefaultAsync(m => m.Id == id);
-            _context.Admins.Remove(admins);
+            var estacion = await _context.Estacioneve.SingleOrDefaultAsync(m => m.Id == id);
+            _context.Estacioneve.Remove(estacion);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -114,6 +116,14 @@ namespace CitraDataStore.Controllers
         private bool AdminsExists(int id)
         {
             return _context.Admins.Any(e => e.Id == id);
+        }
+
+        
+        [HttpGet]
+        public JsonResult NombreEstaciones()
+        {
+            List<Agrodatos> lista = context.GetAllStations();
+            return Json(lista);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace CitraDataStore.Controllers
 {
     public class AccountController : Controller
     {
-        MyDbContext db = new MyDbContext();
+        readonly MyDbContext db = new MyDbContext();
 
         public IActionResult Login()
         {
@@ -25,15 +25,25 @@ namespace CitraDataStore.Controllers
         public ActionResult Validate(Admins admin)
         {
             var _admin = db.Admins.Where(s => s.Email == admin.Email).FirstOrDefault();
+
             if (_admin != null)
             {
                 if (_admin.Password == admin.Password)
                 {
-                    HttpContext.Session.SetString("email", _admin.Email);
+                    //HttpContext.Session.SetString("email", _admin.Email);
+                    try
+                    {
+                        HttpContext.Session.SetString("email", admin.Email);
+                    }
+                    catch(Exception ex)
+                    {
+                        throw ex;
+                    }
                     HttpContext.Session.SetInt32("id", _admin.Id);
                     HttpContext.Session.SetInt32("role_id", (int)_admin.RolesId);
                     HttpContext.Session.SetString("name", _admin.FullName);
-
+                    HttpContext.Session.SetString("id_estaciones_asignadas", _admin.IdEstacionesAsignadas);
+                    HttpContext.Session.SetInt32("dias_disponibles", _admin.Dias_disponibles);
                     int roleId = (int)HttpContext.Session.GetInt32("role_id");
                     List<Menus> menus = db.LinkRolesMenus.Where(s => s.RolesId == roleId).Select(s => s.Menus).ToList();
 
@@ -47,7 +57,7 @@ namespace CitraDataStore.Controllers
                     HttpContext.Session.SetString("menuString", menuString);
                     HttpContext.Session.SetString("menus", JsonConvert.SerializeObject(menus));
 
-                    return Json(new { status = true, message = "Login Successfull!" });
+                    return Json(new { status = true, message = "Login Successfull!", context = HttpContext.Session.GetString("email"), context2 = _admin.FullName });
                 }
                 else
                 {
@@ -72,7 +82,11 @@ namespace CitraDataStore.Controllers
 
                     if (url != "#")
                     {
-                        string line = String.Format(@"<li><a href=""{0}""><i class=""{2}""></i> <span>{1}</span></a></li>", url, menuText, icon);
+                        string line = String.Format(@"
+                                    <a class=""collapse-item""href=""{0}"">
+                                        <i class=""{2}""></i> 
+                                            <span>{1}</span>
+                                    </a>", url, menuText, icon);
                         sb.Append(line);
                     }
 
@@ -82,11 +96,19 @@ namespace CitraDataStore.Controllers
                     DataRow[] subMenu = table.Select(String.Format("ParentId = '{0}'", pid));
                     if (subMenu.Length > 0 && !pid.Equals(parentId))
                     {
-                        string line = String.Format(@"<li class=""treeview""><a href=""#""><i class=""{0}""></i> <span>{1}</span><span class=""pull-right-container""><i class=""fa fa-angle-left pull-right""></i></span></a><ul class=""treeview-menu"">", icon, menuText);
+                        string preline = "";
+                        string line = String.Format(@"
+                                <li class=""nav-item"">
+                                    <a class=""nav-link collapsed"" data-toggle=""collapse"" data-target=""#menu{2}"" href=""#"" aria-expanded=""true"" aria-controls=""menu{2}"">
+                                        <i class=""{0}""></i> 
+                                        <span>{1}</span>
+                                    </a>
+                                    <div id=""menu{2}"" class=""collapse"" aria-labelledby=""headingTwo"" data-parent=""#accordionSidebar"">
+                                    <div class=""bg-white py-2 collapse-inner rounded"">", icon, menuText, pid);
                         var subMenuBuilder = new StringBuilder();
                         sb.AppendLine(line);
                         sb.Append(GenerateUL(subMenu, table, subMenuBuilder));
-                        sb.Append("</ul></li>");
+                        sb.Append("</div></div></li>");
                     }
                 }
             }

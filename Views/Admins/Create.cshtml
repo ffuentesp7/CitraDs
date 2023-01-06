@@ -1,9 +1,111 @@
 ﻿@model CitraDataStore.Models.Admins
 
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
     ViewData["Title"] = "Crear Usuario";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+-->
+
+<script>
+
+    //document.getElementById("divEstacion").onload() = function () { getStationsNames() }
+
+    function getStationsNames() {
+
+
+      console.log("funcion y el id: ");
+      $.ajax(
+        {
+              type: "GET",
+              data: {
+              },
+              url: '@Url.Action("NombreEstaciones", "EstacionesAsignadas")',
+              dataType: "json",
+              contentType: "application/json; charset=utf-8",
+              error: function (jqXHR, exception) {
+
+                  var msg = '';
+                  if (jqXHR.status === 0) {
+                      msg = 'Not connect.\n Verify Network.';
+                  } else if (jqXHR.status == 404) {
+                      msg = 'Requested page not found. [404]';
+                  } else if (jqXHR.status == 500) {
+                      msg = 'Internal Server Error [500].';
+                  } else if (exception === 'parsererror') {
+                      msg = 'Requested JSON parse failed.';
+                  } else if (exception === 'timeout') {
+                      msg = 'Time out error.';
+                  } else if (exception === 'abort') {
+                      msg = 'Ajax request aborted.';
+                  } else {
+                      msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                  }
+                  alert("error");
+                  console.log(msg);
+              },
+
+
+              success: function (data, status, result, lista) {
+            //console.log(data.lista.length())
+            //console.log(Object.values(data));
+            //console.log(lista);
+            //alert(Object.values(data) + "\nStatus: " + status);
+            //console.log(data.length);
+
+
+                  if (data.length > 0) {
+                      var checkBox = '<div class="col-md-8 col-form-label" id="divEstacion">';
+                      checkBox += '<form class="form-inline">';
+                      $.each(data, function (i, Estacion) {
+                          checkBox += '<div class="form-group">'
+                          checkBox += '<div class="custom-control custom-checkbox custom-control-inline">';
+                          checkBox += '<input class="custom-control-input" type="checkbox" value = "' + Estacion.id + '" id = "check' + i + '">';
+                          checkBox += '<label class="custom-control-label" for= "check' + i + '">' + Estacion.nombreEstacion + '</label ></div></div>';
+                      });
+                      checkBox += '</form>';
+                      $('#divEstacion').replaceWith(checkBox);
+                  }
+
+              }
+          })
+
+
+
+    }
+
+    window.onload = getStationsNames;
+
+    async function getCkeckbox() {
+        var sensores = $('#divEstacion')[0];
+
+        var childSize = sensores.childNodes[0].length;
+        console.log("chldSize: " + childSize);
+        var check = "";
+        for (var i = 0; i < childSize; i++) {
+            console.log("ChildValue: " + sensores.childNodes[0].childNodes[i].childNodes[0].childNodes[0].value);
+            //console.log("asdf: " + sensores.childNodes[i].childNodes[0].checked);
+            if (sensores.childNodes[0].childNodes[i].childNodes[0].childNodes[0].checked == true) {
+                console.log("ChildValue no sel: " + sensores.childNodes[0].childNodes[i].childNodes[0].childNodes[0].value);
+                check = check +","+ await sensores.childNodes[0].childNodes[i].childNodes[0].childNodes[0].value;
+            }
+
+            console.log("tamaño arreglo: " + check);
+        }
+        //$('#')
+        $('#IdEstacionesAsignadas')[0].value = check;
+        //return check;
+    }
+
+
+
+</script>
+
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
@@ -12,42 +114,55 @@
     </h1>
 </section>
 <!-- Main content -->
-<section class="content container-fluid">
+
+<div class="card shadow mb-4">
     <div class="row">
         <!-- left column -->
         <div class="col-md-12">
-            <!-- general form elements -->
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Agregar Nuevo Usuario</h3>
-                </div>
-                <!-- /.box-header -->
-                <!-- form start -->
-                <form  method="post" action="/Admins/Create">
-                    <div class="box-body">
-                        <div class="form-group">
-                            <label for="inputEmail3">Nombre</label>
-                            <input type="text" class="form-control" id="FullName" name="FullName" placeholder="Nombre">
-                        </div>
-                        <div class="form-group">
-                            <label for="exampleInputPassword1">Email</label>
-                            <input type="email" class="form-control" id="Email" name="Email" placeholder="Escribir E-mail">
-                        </div>
-                        <div class="form-group">
-                            <label for="exampleInputPassword1">Password</label>
-                            <input type="password" class="form-control" id="Password" name="Password" placeholder="Escribir Password">
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="RolesId" class="control-label"></label>
-                            @Html.DropDownList("RolesId", null, htmlAttributes: new { @class = "form-control" })
-                        </div>
-                    </div>
-                    <!-- /.box-body -->
-                    <div class="box-footer">
-                        <button type="submit" class="btn btn-primary">Crear</button>
-                    </div>
-                    <!-- /.box-footer -->
-                </form>
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Agregar Nuevo Usuario</h6>
             </div>
-            <!-- /.box -->
-</section>
+            <form method="post" action="/Admins/Create">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="inputEmail3">Nombre</label>
+                        <input type="text" class="form-control" id="FullName" name="FullName" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Email</label>
+                        <input type="email" class="form-control" id="Email" name="Email" placeholder="Escribir E-mail">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Password</label>
+                        <input type="password" class="form-control" id="Password" name="Password" placeholder="Escribir Password">
+                    </div>
+                    <div class="form-group">
+                        <label>Días disponibles</label>
+                        <input type="number" class="form-control" id="Dias_disponibles" name="Dias_disponibles" placeholder="Asignar días disponibles">
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="RolesId" class="control-label"></label>
+                        @Html.DropDownList("RolesId", null, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <input type="hidden" name="IdEstacionesAsignadas" id="IdEstacionesAsignadas" value=getCheckbox() />
+
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Estaciones Disponibles para asignar</label>
+                        <div class="col-md-9 col-form-label" id="divEstacion">
+                            <input class="form-control" type="text" placeholder="No se han encontrado Estaciónes" readonly>
+                            <!--Aqui van los checkbox en funcion de la esacion seleccionada. Son llamados en el script-->
+                        </div>
+
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" onclick=getCkeckbox() class="btn btn-primary">Crear</button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+    </div>
+
